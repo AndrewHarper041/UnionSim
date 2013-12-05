@@ -28,6 +28,7 @@ public class UnionSim
 	static ArrayList<Cashier> cashiers = new ArrayList<Cashier>();
 	static OldCashier oldCashier = new OldCashier();
 	static boolean oldCheckout = false;
+        static Double multVenProb=0.0;
 	
 	//Generate all objects needed for simulation
 
@@ -59,8 +60,12 @@ public class UnionSim
 		int cC = sc.nextInt();
 		System.out.print("Rate people come in?");
 		int customerRate = sc.nextInt();
+                //****************vvvvvvvvvvvvvvvvvvvvvvvv******************TAKYEE WROTE THIS**************************************************
+                System.out.print("Input the probability of the number of vendors the customer will visit (Probably that they will go to multiple vendors)");
+                multVenProb= sc.nextDouble();
+		//*****************^^^^^^^^^^^^^^^^^^^^*********************TAKYEE WROTE THIS**********************************
 		
-		if(cC == 0)
+		if(cC == 0) // THis is the old setup
 			oldCheckout = true;
 
 		Person per;
@@ -99,7 +104,8 @@ public class UnionSim
 	
 	public static void handleEvent(Person per)
 	{
-		
+		//System.out.println("HANDLE ME");
+                
 		//Normal customer events
 		if(oldCheckout)
 		{
@@ -118,23 +124,35 @@ public class UnionSim
 					}
 					break;
 					
-				case BOUGHT: //People leave food place, POPING the line, and sent to checkout
+				case BOUGHT: //People leave food place, and sent to checkout
 					for(Eatery e : eaterys)
 						if(per.type == e.type)
 							e.popLine(per);
-						
-					if(!per.drink)
-					{
-						oldCashier.arrive(per);
-					}
-					
-					else if(per.drink)
-					{
-						for(Eatery e : eaterys)
-							if(e.type == Type.DRINK)
-								e.arrive(per);
-					}
-					
+                                        //call my method *************TAKYEE EDITED THIS**************************
+                                        if(per.numVendersDesired < per.numVendorsVisited)
+                                        {
+                                            System.out.println("THis is the number vendors desired "+per.numVendersDesired);
+                                            System.out.println("THis is the number vendors visited "+per.numVendorsVisited);
+                                            //call the method TakYee Wrote control f elevator
+                                            //This method is going to check where they've been and replace it with a new one
+                                           vendorChecker(per);
+                                           break;
+                                        }
+                                        else
+                                        {
+                                            if(!per.drink)
+                                            {
+                                                oldCashier.arrive(per);
+                                            }
+                                            else if(per.drink)
+                                            {
+                                                for(Eatery e : eaterys)
+                                                        if(e.type == Type.DRINK)
+                                                                e.arrive(per);
+                                            }
+                                        }
+                                        //call my method *************TAKYEE EDITED THIS**************************
+                                        //break if they want to go somewhere else
 					break;
 					
 				case DRINK:
@@ -171,13 +189,26 @@ public class UnionSim
 					}
 					break;
 				case BOUGHT: //People leave food place, POPING the line, and sent to checkout
-					for(Eatery e : eaterys)
+                                       for(Eatery e : eaterys)
 						if(per.type == e.type)
-						{
-							//System.out.println("people bought food");
 							e.popLine(per);
-							e.cashier.arrive(per);
-						}
+                                       
+                                        if(per.numVendersDesired < per.numVendorsVisited)
+                                        {
+                                            //call the method TakYee Wrote control f elevator
+                                            //This method is going to check where they've been and replace it with a new one
+                                           vendorChecker(per);
+                                           break;
+                                        }
+                                        else
+                                        {
+                                            for(Eatery e : eaterys)
+                                                    if(per.type == e.type)
+                                                    {
+                                                            //System.out.println("people bought food");
+                                                            e.cashier.arrive(per);
+                                                    }
+                                        }
 					break;
 					
 				case CHECKOUT: //People leave food place, POPING the line, and being placed in Drink process if oldCheckout.
@@ -197,13 +228,36 @@ public class UnionSim
 	public static void generateCustomer(double lambda)
 	{
 		//System.out.println("Commute generate Event que" + eventQueue.size());
+                Person tempPer;
 		double aTime = 0;
 		double bags;
 		int s = eventQueue.size();
 		while(aTime <= 37800)
 		{
-			aTime += (-Math.log(1.0 - rand.nextDouble()) / lambda) * 60;//Generate time for next arrival * 60 to convert to sec
-			eventQueue.add(new Person(aTime + (37800 * (dayCount - 1)), getType(), getDrink())); 
+			//aTime += (-Math.log(1.0 - rand.nextDouble()) / lambda) * 60;//Generate time for next arrival * 60 to convert to sec
+			//eventQueue.add(new Person(aTime + (37800 * (dayCount - 1)), getType(), getDrink())); 
+                        
+                        aTime += (-Math.log(1.0 - rand.nextDouble()) / lambda) * 60;//Generate time for next arrival * 60 to convert to sec
+                        //***************ANDREW'S ORIGINAL CODE vv *************************************************************************
+			//eventQueue.add(new Person(aTime + (37800 * (dayCount - 1)), getType(), getDrink())); 
+                        //***************TAKYEE'S EDITED CODE vv ***************************************
+                        int tempNumVendors=1;//this used to be 0
+                        boolean enoughVendors=false;
+                        while(enoughVendors==false && tempNumVendors<5)
+                        {
+                            double a=rand.nextDouble();
+                            if(a<multVenProb)
+                                tempNumVendors++;
+                            else
+                                enoughVendors=true;
+                        }
+                        //System.out.println("tempNumVndors"+tempNumVendors);
+                        //************************************THIS IS WHERE TAKYEE ADDED TEMPTYPE INTO THE ARRAYLIST****************************
+                        Type tempType=getType();
+                        tempPer=new Person(aTime + (37800 * (dayCount - 1)), tempType, getDrink(),tempNumVendors,0);
+                        //tempPer.prevVen.add(tempType);
+                        eventQueue.add(tempPer);
+                        tempPer.prevVen.add(tempPer.type);//adds type
 		}
 	}
 	
@@ -253,15 +307,21 @@ public class UnionSim
 		public Type type;
 		public double time;//States the time this event pops
 		public double arrival;//States when this customers originally arrived
-		
+                public int numVendorsVisited;
+                 //*****************************************TAKYEE WROTE THIS ARRAYLIST and numVendorsDesired******************************
+		public ArrayList<Type> prevVen = new ArrayList<Type>();
+                public int numVendersDesired;
 		//Customer data container/event object
-		public Person(double a, Type b, boolean d)
+                //*******************************************TAKYEE ADDED numVendorsVisited**************************
+		public Person(double a, Type b, boolean d, int e,int k)
 		{
 			drink = d;
 			time = a;
 			arrival = a;
 			type = b;
+                        numVendersDesired =e;
 			state = State.NOTARRIVED;
+                        numVendorsVisited=k;
 		}
 		
 		@Override
@@ -297,12 +357,10 @@ public class UnionSim
 			if(t == Type.SALAD)
 				temp = 4;
 			if(t == Type.STRUTTERS || t == Type.SPECIAL)
-				temp = 5;
-				
+				temp = 5;		
  			cashier = new Cashier(t, temp);
-					
-			
 			line = new LinkedList<Person>();
+                        
 		}
 		 
 		public void arrive(Person per)
@@ -347,8 +405,11 @@ public class UnionSim
 					per.time += generateTime(5);
 					break;
 			}
-			
-			per.state = State.BOUGHT;
+                        //**********************************TAKYEE EDITED*********************************************
+                        per.numVendorsVisited++;
+                        //**********************************TAKYEE EDITED*********************************************
+                        //System.out.println("Changes the state to bought");
+			per.state= State.BOUGHT;
 			//If NOT old and person has drink then add drink time
 			if(type == Type.DRINK)
 				per.state = State.DRINK;
@@ -414,7 +475,124 @@ public class UnionSim
 			eventQueue.add(per);
 		}		
 	}
-	
+        //*****************************************************************TAKYEE WROTE THIS METHOD************************************
+	public static void vendorChecker(Person per)
+        {
+            boolean foundNewType=false;
+            while(foundNewType==false) //KEEP GOING UNTIL NEW TYPE DETERMINED
+                {
+                //System.out.println("IS THIS THE INFINITY THING");
+                        //5 different things
+                        //generate random number between 0 and 4
+                        //0 is pizza, 1 is taco, 2 is strutters, 3 is special, 4 is salad
+                        int newType = rand.nextInt(5); //5 is exclusive 
+                        switch(newType) //checking to see if this person's arraylist already has this type
+                        {
+                            //REMEMBER TO PUT NEW TYPE INTO ARRAYLIST******
+                            case 0: //pizza
+                                for(Type varName:per.prevVen)
+                                {
+                                    if(varName.equals(Type.PIZZA))
+                                    {
+                                        foundNewType=false;//just for me to not get confused #redundant
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        foundNewType=true;
+                                        per.type=Type.PIZZA;
+                                        //SEND IT BACK INTO THE THING
+                                        per.prevVen.add(per.type);
+                                        per.numVendorsVisited++;
+                                       // processPerson(per);
+                                        break;
+                                    }
+                                }
+                                break;
+                            case 1: //taco
+                                for(Type varName:per.prevVen)
+                                {
+                                    if(varName.equals(Type.TACO))
+                                    {
+                                        foundNewType=false;//just for me to not get confused #redundant
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        foundNewType=true;
+                                        per.type=Type.TACO;
+                                        per.prevVen.add(per.type);
+                                        //processPerson(per);
+                                        //SEND IT BACK INTO THE THING
+                                        per.numVendorsVisited++;
+                                        break;
+                                    }
+                                }
+                                break;
+                            case 2: //strutters
+                                for(Type varName:per.prevVen)
+                                {
+                                    if(varName.equals(Type.STRUTTERS))
+                                    {
+                                        foundNewType=false;//just for me to not get confused #redundant
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        foundNewType=true;
+                                        per.type=Type.STRUTTERS;
+                                        //SEND IT BACK INTO THE THING
+                                        per.prevVen.add(per.type);
+                                        per.numVendorsVisited++;
+                                        //processPerson(per);
+                                        break;
+                                    }
+                                }
+                                break;
+                            case 3: // special
+                                for(Type varName:per.prevVen)
+                                {
+                                    if(varName.equals(Type.SPECIAL))
+                                    {
+                                        foundNewType=false;//just for me to not get confused #redundant
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        foundNewType=true;
+                                        per.type=Type.SPECIAL;
+                                        //SEND IT BACK INTO THE THING
+                                        per.prevVen.add(per.type);
+                                        per.numVendorsVisited++;
+                                        //processPerson(per);
+                                        break;
+                                    }
+                                }
+                                break;
+                            case 4://salad
+                                for(Type varName:per.prevVen)
+                                {
+                                    if(varName.equals(Type.SALAD))
+                                    {
+                                        foundNewType=false;//just for me to not get confused #redundant
+                                        break;
+                                    }
+                                    else
+                                    {
+                                        foundNewType=true;
+                                        per.type=Type.SALAD;
+                                        //SEND IT BACK INTO THE THING
+                                        per.prevVen.add(per.type);
+                                        per.numVendorsVisited++;
+                                        //processPerson(per);
+                                        break;
+                                    }
+                                }
+                                break;
+                        }
+                }
+               eventQueue.add(per);
+        }
 	public static class OldCashier
 	{
 		Person lastOccupant;
@@ -481,5 +659,27 @@ public class UnionSim
 	{
 		return (60 * (Math.log(1 - rand.nextDouble()) / -(1/min)));
 	}
-	
+	public static double poisson(double mean){ //**************************************TAKYEE WROTE THIS*****************
+            Random random = new Random();
+            double r = (-Math.log(1.0-random.nextDouble()/mean*60));
+            return r;
+        }
+       
+        public static boolean bernoulli(double p)
+        {
+            if(p<0.0 || p>1.0)
+            {
+                 throw new IllegalArgumentException("Probablility must be between 0.0 and 0.1");
+            }
+            return uniform()<p;
+        }
+        public static double uniform(){
+            Random random = new Random();
+            return random.nextDouble();
+        }
+        public static boolean bernoulli(double p, double q)
+        {
+            return bernoulli(0.5);
+        }
+         //******************************************************TAKYEE WROTE THIS*****************
 }
