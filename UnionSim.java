@@ -89,6 +89,9 @@ public class UnionSim
 			System.out.println("time " + time);
 			System.out.println("events " + eventQueue.size());
 			System.out.println("people fed " + allPeople.size());
+			System.out.println("checkout line " + oldCashier.line.size());
+			for(Eatery e : eaterys)
+				System.out.println(e.type + " line " + e.line.size());
 		}
 	}
 	
@@ -103,40 +106,48 @@ public class UnionSim
 			switch(per.state)
 			{
 				case NOTARRIVED: //People arrive, and are processed or placed in line
-					//System.out.println("handle event");
+					//System.out.println(per.type);
 					for(Eatery e : eaterys)
+					{
+						//System.out.println(e.type);
 						if(per.type == e.type)
 						{
 							//System.out.println("people arrived");
 							e.arrive(per);
 						}
-					break;
-					
-				case BOUGHT: //People leave food place, POPING the line, and sent to Drink process if oldCheckout.
-					//System.out.println("bought");
-					for(Eatery e : eaterys)
-						if(e.type == Type.DRINK && per.drink)
-						{
-							//System.out.println("drink");
-							e.popLine(per);
-							e.arrive(per);
-						}
-							
-					if(!per.drink)
-					{
-						oldCashier.popLine(per);
-						oldCashier.arrive(per);
 					}
 					break;
-										
-				case DRINK: //ONLY oldCheckout. People leave drink and are placed in checkout
-					//System.out.println("drink");
+					
+				case BOUGHT: //People leave food place, POPING the line, and sent to checkout
 					for(Eatery e : eaterys)
 						if(per.type == e.type)
 							e.popLine(per);
-					oldCashier.arrive(per);
+						
+					if(!per.drink)
+					{
+						oldCashier.arrive(per);
+					}
+					
+					else if(per.drink)
+					{
+						for(Eatery e : eaterys)
+							if(e.type == Type.DRINK)
+								e.arrive(per);
+					}
+					
 					break;
-				case CHECKOUT:  
+					
+				case DRINK:
+					for(Eatery e : eaterys)
+						if(e.type == Type.DRINK)
+						{
+							e.popLine(per);
+						}
+					
+					oldCashier.arrive(per);
+					break; 
+					
+				case CHECKOUT: //People leave food place, POPING the line, and being placed in Drink process if oldCheckout.
 					oldCashier.popLine(per);
 					allPeople.add(per);
 					break;
@@ -168,10 +179,12 @@ public class UnionSim
 							e.cashier.arrive(per);
 						}
 					break;
+					
 				case CHECKOUT: //People leave food place, POPING the line, and being placed in Drink process if oldCheckout.
 					for(Eatery e : eaterys)
 						if(per.type == e.type)
 							e.cashier.popLine(per);
+					
 					allPeople.add(per);
 					break;
 			}
@@ -302,8 +315,8 @@ public class UnionSim
 				
 			else
 				line.add(per);
-
-
+			
+			
 		}
 
 		public void popLine(Person per)
@@ -338,7 +351,7 @@ public class UnionSim
 			per.state = State.BOUGHT;
 			//If NOT old and person has drink then add drink time
 			if(type == Type.DRINK)
-				per.state = State.CHECKOUT;
+				per.state = State.DRINK;
 				
 			if(!oldCheckout && per.drink)
 				per.time += generateTime(.2);
@@ -423,9 +436,8 @@ public class UnionSim
 		}
 		
 		public void arrive(Person per)
-		{
+		{			
 			boolean processed = false;
-			//System.out.println("old process");
 			
 			for(Cashier c : cash)
 			{
@@ -437,22 +449,29 @@ public class UnionSim
 			}
 			
 			if(!processed)
+			{
 				line.add(per);
-			
+			}
 		}
 
 		public void popLine(Person per)
 		{
 			for(Cashier c : cash)
 			{
-				System.out.println("HI");
-				if(per.lastCash == c.name && !line.isEmpty())
+				if(per.lastCash == c.name)
 				{
-					//System.out.println("HI");
 					c.busy = false;
-					c.processPerson(line.pop());
 				}
 			}
+	
+				
+			
+			for(Cashier c : cashiers)
+				if(!c.busy)
+				{
+					c.processPerson(line.pop());
+
+				}
 		}
 		
 
