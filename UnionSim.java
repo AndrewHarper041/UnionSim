@@ -42,11 +42,22 @@ public class UnionSim
 	
 	public static void main(String args[])
 	{
+		double avgTaco = 0;
+		double numTaco = 0;
+		double avgPizza = 0;
+		double numPizza = 0;
+		double avgSalad = 0;
+		double numSalad = 0;
+		double avgSpecial = 0;
+		double numSpecial = 0;
+		double avgStrutters = 0;
+		double numStrutters = 0;
 		try
 		{
 		PrintWriter wr = new PrintWriter(new File(args[0]));
 		wr.print(" <html>" + "\n" + "<head>" + "\n" + "<link href=\"css/bootstrap.css\" rel=\"stylesheet\" type=\"text/css\">" + "\n" + "<link href=\"css/style.css\" rel=\"stylesheet\" type=\"text/css\" />" + "\n" + "</head>" + "\n" + "<body>" + "\n" + "<table class=\"table\">" + "\n");
-        wr.println("<thead>");  
+       // for CHANGE MODEL 
+		wr.println("<thead>");  
         wr.println("<tr>");  
         wr.println("<th>Arrival Rate</th>");  
         wr.println("<th>Avg Time TacoBell</th>");  
@@ -56,7 +67,9 @@ public class UnionSim
         wr.println("<th>Avg Time Strutters</th>");  
         wr.println("</tr>");  
         wr.println("</thead>");  
-  
+	//	for
+		//	CHANGE customerRate and reset all the variables at the top
+			
 
 		eaterys.add(new Eatery(Type.PIZZA, 37800, 1));
 		eaterys.add(new Eatery(Type.SPECIAL, 34200, 2));
@@ -105,16 +118,7 @@ public class UnionSim
 				handleEvent(per);
 			}
 			
-			double avgTaco = 0;
-			double numTaco = 0;
-			double avgPizza = 0;
-			double numPizza = 0;
-			double avgSalad = 0;
-			double numSalad = 0;
-			double avgSpecial = 0;
-			double numSpecial = 0;
-			double avgStrutters = 0;
-			double numStrutters = 0;
+			
 
 			for(Person p : allPeople)
 			{
@@ -157,6 +161,9 @@ public class UnionSim
 			wr.println("<td>" + avgStrutters/numStrutters + "</td>");
 			wr.println("</tr>");
 			
+			//END FOR
+			//END FOR
+
 			/*
 			wr.println("events " + eventQueue.size());
 			wr.println("people fed " + allPeople.size());
