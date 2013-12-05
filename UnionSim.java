@@ -25,7 +25,6 @@ public class UnionSim
 	static double checkTime = .2;
 	static double drinkTime = .2;
 	static ArrayList<Eatery> eaterys = new ArrayList<Eatery>();
-	static ArrayList<Cashier> cashiers = new ArrayList<Cashier>();
 	static OldCashier oldCashier = new OldCashier();
 	static boolean oldCheckout = false;
         static Double multVenProb=0.0;
@@ -43,6 +42,22 @@ public class UnionSim
 	
 	public static void main(String args[])
 	{
+		try
+		{
+		PrintWriter wr = new PrintWriter(new File(args[0]));
+		wr.print(" <html>" + "\n" + "<head>" + "\n" + "<link href=\"css/bootstrap.css\" rel=\"stylesheet\" type=\"text/css\">" + "\n" + "<link href=\"css/style.css\" rel=\"stylesheet\" type=\"text/css\" />" + "\n" + "</head>" + "\n" + "<body>" + "\n" + "<table class=\"table\">" + "\n");
+        wr.println("<thead>");  
+        wr.println("<tr>");  
+        wr.println("<th>Arrival Rate</th>");  
+        wr.println("<th>Avg Time TacoBell</th>");  
+        wr.println("<th>Avg Time Pizza</th>");  
+        wr.println("<th>Avg Time Nicola's</th>");  
+        wr.println("<th>Avg Time Culinary Classic</th>");  
+        wr.println("<th>Avg Time Strutters</th>");  
+        wr.println("</tr>");  
+        wr.println("</thead>");  
+  
+
 		eaterys.add(new Eatery(Type.PIZZA, 37800, 1));
 		eaterys.add(new Eatery(Type.SPECIAL, 34200, 2));
 		eaterys.add(new Eatery(Type.TACO, 37800, 3));
@@ -77,9 +92,7 @@ public class UnionSim
 			
 			//Generate this days worth of customers and place in queue
 			generateCustomer(customerRate);
-			
-			System.out.println("Customer Num for this day: " + eventQueue.size());
-			
+						
 			
 			//System.out.println("event peek " + eventQueue.peek().time);
 			int numInter;
@@ -91,13 +104,77 @@ public class UnionSim
 				
 				handleEvent(per);
 			}
-			System.out.println("time " + time);
-			System.out.println("events " + eventQueue.size());
-			System.out.println("people fed " + allPeople.size());
-			System.out.println("checkout line " + oldCashier.line.size());
+			
+			double avgTaco = 0;
+			double numTaco = 0;
+			double avgPizza = 0;
+			double numPizza = 0;
+			double avgSalad = 0;
+			double numSalad = 0;
+			double avgSpecial = 0;
+			double numSpecial = 0;
+			double avgStrutters = 0;
+			double numStrutters = 0;
+
+			for(Person p : allPeople)
+			{
+				if(p.type == Type.TACO)
+				{
+					numTaco++;
+					avgTaco += (p.time - p.arrival);
+				}
+				if(p.type == Type.PIZZA)
+				{
+					numPizza++;
+					avgPizza += (p.time - p.arrival);
+				}
+				if(p.type == Type.SPECIAL)
+				{
+					numSpecial++;
+					avgSpecial += (p.time - p.arrival);
+				}
+				if(p.type == Type.STRUTTERS)
+				{
+					numStrutters++;
+					avgStrutters += (p.time - p.arrival);
+				}
+				if(p.type == Type.SALAD)
+				{
+					numSalad++;
+					avgSalad += (p.time - p.arrival);
+				}
+			}
+			
+
+			
+			wr.println("<tbody>");
+			wr.println("<tr>");
+			wr.println("<td>" + customerRate + "</td>");
+			wr.println("<td>" + avgTaco/numTaco + "</td>");
+			wr.println("<td>" + avgPizza/numPizza + "</td>");
+			wr.println("<td>" + avgSalad/numSalad + "</td>");
+			wr.println("<td>" + avgSpecial/numSpecial + "</td>");
+			wr.println("<td>" + avgStrutters/numStrutters + "</td>");
+			wr.println("</tr>");
+			
+			/*
+			wr.println("events " + eventQueue.size());
+			wr.println("people fed " + allPeople.size());
+			wr.println("checkout line " + oldCashier.line.size());
 			for(Eatery e : eaterys)
-				System.out.println(e.type + " line " + e.line.size());
+				wr.println(e.type + " line " + e.line.size());
+			wr.println("avgTaco = " + avgTaco/numTaco);
+			wr.println("avgPizza = " + avgPizza/numPizza);
+			wr.println("avgSpecial = " + avgSpecial/numSpecial);
+			wr.println("avgStrutters = " + avgStrutters/numStrutters);
+			wr.println("avgSalad = " + avgSalad/numSalad);*/
+			wr.print("</tbody>" + "\n" + "</table>" + "\n" + "</body>" + "\n" + "</html>");
+			wr.flush();
+			
+			
 		}
+		}
+			catch(Exception e){System.out.println(e);}
 	}
 	
 	//-----------------------------------------------FUNCTIONS---------------------------------------------------------
@@ -642,13 +719,10 @@ public class UnionSim
 				}
 			}
 	
-				
-			
-			for(Cashier c : cashiers)
-				if(!c.busy)
+			for(Cashier c : cash)
+				if(!c.busy && !line.isEmpty())
 				{
 					c.processPerson(line.pop());
-
 				}
 		}
 		
