@@ -27,7 +27,7 @@ public class UnionSim
 	static ArrayList<Eatery> eaterys = new ArrayList<Eatery>();
 	static OldCashier oldCashier = new OldCashier();
 	static boolean oldCheckout = false;
-        static Double multVenProb=0.0;
+    static Double multVenProb=0.0;
 	
 	//Generate all objects needed for simulation
 
@@ -55,18 +55,9 @@ public class UnionSim
 		try
 		{
 		PrintWriter wr = new PrintWriter(new File(args[0]));
-		wr.print(" <html>" + "\n" + "<head>" + "\n" + "<link href=\"css/bootstrap.css\" rel=\"stylesheet\" type=\"text/css\">" + "\n" + "<link href=\"css/style.css\" rel=\"stylesheet\" type=\"text/css\" />" + "\n" + "</head>" + "\n" + "<body>" + "\n" + "<table class=\"table\">" + "\n");
+		wr.print(" <html>" + "\n" + "<head>" + "\n" + "<link href=\"css/bootstrap.css\" rel=\"stylesheet\" type=\"text/css\">" + "\n" + "<link href=\"css/style.css\" rel=\"stylesheet\" type=\"text/css\" />" + "\n" + "</head>" + "\n" + "<body>" + "\n");
        // for CHANGE MODEL 
-		wr.println("<thead>");  
-        wr.println("<tr>");  
-        wr.println("<th>Arrival Rate</th>");  
-        wr.println("<th>Avg Time TacoBell</th>");  
-        wr.println("<th>Avg Time Pizza</th>");  
-        wr.println("<th>Avg Time Nicola's</th>");  
-        wr.println("<th>Avg Time Culinary Classic</th>");  
-        wr.println("<th>Avg Time Strutters</th>");  
-        wr.println("</tr>");  
-        wr.println("</thead>");  
+		 
 	//	for
 		//	CHANGE customerRate and reset all the variables at the top
 			
@@ -82,10 +73,8 @@ public class UnionSim
 		//Get user input on # of days
 		String input = "";
 		Scanner sc = new Scanner(System.in);
-		System.out.print("Simulate how many days?");
+		System.out.print("Simulate how many hours?");
 		days = sc.nextInt();
-		System.out.print("Old(0) or new(1) style?");
-		int cC = sc.nextInt();
 		System.out.print("Rate people come in?");
 		int customerRate = sc.nextInt();
                 //****************vvvvvvvvvvvvvvvvvvvvvvvv******************TAKYEE WROTE THIS**************************************************
@@ -93,92 +82,130 @@ public class UnionSim
                 multVenProb= sc.nextDouble();
 		//*****************^^^^^^^^^^^^^^^^^^^^*********************TAKYEE WROTE THIS**********************************
 		
-		if(cC == 0) // THis is the old setup
-			oldCheckout = true;
+		oldCheckout = true;
 
 		Person per;
-		
-		for(int i = 1; i <= days; i++)
-		{
-			dayCount++;
-			double fTime = 0;
-			
-			//Generate this days worth of customers and place in queue
-			generateCustomer(customerRate);
-						
-			
-			//System.out.println("event peek " + eventQueue.peek().time);
-			int numInter;
-			while(!eventQueue.isEmpty() && eventQueue.peek().time <= 37800 * dayCount)
+		for(int two = 0; two < 2; two++)
+		{	
+			if(two == 0)
 			{
-				per = eventQueue.poll();
-					
-				time = per.time;
+				wr.print("\n" + "<div class=\"hero-unit\">" + "\n" + "<h1>Old Checkout</h1>");
+				wr.print("\n" + "<table class=\"table\">" + "\n");
+				wr.println("<thead>");  
+				wr.println("<tr>");  
+				wr.println("<th>Arrival Rate</th>");  
+				wr.println("<th>Avg Time TacoBell</th>");  
+				wr.println("<th>Avg Time Pizza</th>");  
+				wr.println("<th>Avg Time Nicola's</th>");  
+				wr.println("<th>Avg Time Culinary Classic</th>");  
+				wr.println("<th>Avg Time Strutters</th>");  
+				wr.println("</tr>");  
+				wr.println("</thead>"); 
 				
-				handleEvent(per);
-			}
-			
-			
 
-			for(Person p : allPeople)
+			}
+			if(two == 1)
 			{
-				if(p.type == Type.TACO)
-				{
-					numTaco++;
-					avgTaco += (p.time - p.arrival);
-				}
-				if(p.type == Type.PIZZA)
-				{
-					numPizza++;
-					avgPizza += (p.time - p.arrival);
-				}
-				if(p.type == Type.SPECIAL)
-				{
-					numSpecial++;
-					avgSpecial += (p.time - p.arrival);
-				}
-				if(p.type == Type.STRUTTERS)
-				{
-					numStrutters++;
-					avgStrutters += (p.time - p.arrival);
-				}
-				if(p.type == Type.SALAD)
-				{
-					numSalad++;
-					avgSalad += (p.time - p.arrival);
-				}
+				oldCheckout = false;
+				wr.print("\n" + "<div class=\"hero-unit\">" + "\n" + "<h1>New Checkout</h1>");
+				wr.print("\n" + "<table class=\"table\">" + "\n");
+				wr.println("<thead>");  
+				wr.println("<tr>");  
+				wr.println("<th>Arrival Rate</th>");  
+				wr.println("<th>Avg Time TacoBell</th>");  
+				wr.println("<th>Avg Time Pizza</th>");  
+				wr.println("<th>Avg Time Nicola's</th>");  
+				wr.println("<th>Avg Time Culinary Classic</th>");  
+				wr.println("<th>Avg Time Strutters</th>");  
+				wr.println("</tr>");  
+				wr.println("</thead>"); 
 			}
-			
 
 			
-			wr.println("<tbody>");
-			wr.println("<tr>");
-			wr.println("<td>" + customerRate + "</td>");
-			wr.println("<td>" + avgTaco/numTaco + "</td>");
-			wr.println("<td>" + avgPizza/numPizza + "</td>");
-			wr.println("<td>" + avgSalad/numSalad + "</td>");
-			wr.println("<td>" + avgSpecial/numSpecial + "</td>");
-			wr.println("<td>" + avgStrutters/numStrutters + "</td>");
-			wr.println("</tr>");
-			
-			//END FOR
-			//END FOR
 
-			/*
-			wr.println("events " + eventQueue.size());
-			wr.println("people fed " + allPeople.size());
-			wr.println("checkout line " + oldCashier.line.size());
-			for(Eatery e : eaterys)
-				wr.println(e.type + " line " + e.line.size());
-			wr.println("avgTaco = " + avgTaco/numTaco);
-			wr.println("avgPizza = " + avgPizza/numPizza);
-			wr.println("avgSpecial = " + avgSpecial/numSpecial);
-			wr.println("avgStrutters = " + avgStrutters/numStrutters);
-			wr.println("avgSalad = " + avgSalad/numSalad);*/
-			wr.print("</tbody>" + "\n" + "</table>" + "\n" + "</body>" + "\n" + "</html>");
-			wr.flush();
-			
-			
+			for(int i = 1; i <= days; i++)
+			{
+				dayCount++;
+				double fTime = 0;
+				
+				//Generate this days worth of customers and place in queue
+				generateCustomer(customerRate);
+							
+				
+				//System.out.println("event peek " + eventQueue.peek().time);
+				int numInter;
+				while(!eventQueue.isEmpty() && eventQueue.peek().time <= 37800 * dayCount)
+				{
+					per = eventQueue.poll();
+						
+					time = per.time;
+					
+					handleEvent(per);
+				}
+				
+				
+
+				for(Person p : allPeople)
+				{
+					if(p.type == Type.TACO)
+					{
+						numTaco++;
+						avgTaco += (p.time - p.arrival);
+					}
+					if(p.type == Type.PIZZA)
+					{
+						numPizza++;
+						avgPizza += (p.time - p.arrival);
+					}
+					if(p.type == Type.SPECIAL)
+					{
+						numSpecial++;
+						avgSpecial += (p.time - p.arrival);
+					}
+					if(p.type == Type.STRUTTERS)
+					{
+						numStrutters++;
+						avgStrutters += (p.time - p.arrival);
+					}
+					if(p.type == Type.SALAD)
+					{
+						numSalad++;
+						avgSalad += (p.time - p.arrival);
+					}
+				}
+				
+
+				
+				wr.println("<tbody>");
+				wr.println("<tr>");
+				wr.println("<td>" + customerRate + "</td>");
+				wr.println("<td>" + avgTaco/numTaco + "</td>");
+				wr.println("<td>" + avgPizza/numPizza + "</td>");
+				wr.println("<td>" + avgSalad/numSalad + "</td>");
+				wr.println("<td>" + avgSpecial/numSpecial + "</td>");
+				wr.println("<td>" + avgStrutters/numStrutters + "</td>");
+				wr.println("</tr>");
+				
+				//END FOR
+				//END FOR
+
+				/*
+				wr.println("events " + eventQueue.size());
+				wr.println("people fed " + allPeople.size());
+				wr.println("checkout line " + oldCashier.line.size());
+				for(Eatery e : eaterys)
+					wr.println(e.type + " line " + e.line.size());
+				wr.println("avgTaco = " + avgTaco/numTaco);
+				wr.println("avgPizza = " + avgPizza/numPizza);
+				wr.println("avgSpecial = " + avgSpecial/numSpecial);
+				wr.println("avgStrutters = " + avgStrutters/numStrutters);
+				wr.println("avgSalad = " + avgSalad/numSalad);*/
+				wr.print("</tbody>" + "\n" + "</table>" + "\n" + "</div>");
+				wr.flush();
+				
+				
+			}
+			wr.print("\n" + "</body>" + "\n" + "</html>");
 		}
 		}
 			catch(Exception e){System.out.println(e);}
