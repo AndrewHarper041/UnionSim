@@ -2,10 +2,6 @@
 import java.util.*;
 import java.io.*;
 
-//NEED TO ADJUST TIME TO UNION HOURS 
-//NEED TO MAKE TIME DISTRIBUTION BASED ON TIME OF DAY
-//NEED TO RANDOMIZE THE EATERY
-//NEED TO HANDLE BOTH STYLE OF CHECKOUT
 
 public class UnionSim
 {
@@ -73,20 +69,18 @@ public class UnionSim
 		//Get user input on # of days
 		String input = "";
 		Scanner sc = new Scanner(System.in);
-		System.out.print("Simulate how many hours?");
-		days = sc.nextInt();
-		System.out.print("Rate people come in?");
-		int customerRate = sc.nextInt();
-                //****************vvvvvvvvvvvvvvvvvvvvvvvv******************TAKYEE WROTE THIS**************************************************
-                System.out.print("Input the probability of the number of vendors the customer will visit (Probably that they will go to multiple vendors)");
-                multVenProb= sc.nextDouble();
+		//****************vvvvvvvvvvvvvvvvvvvvvvvv******************TAKYEE WROTE THIS**************************************************
+		System.out.print("Input the probability of the number of vendors the customer will visit (Probably that they will go to multiple vendors)");
+		multVenProb= sc.nextDouble();
 		//*****************^^^^^^^^^^^^^^^^^^^^*********************TAKYEE WROTE THIS**********************************
 		
 		oldCheckout = true;
 
 		Person per;
+		
 		for(int two = 0; two < 2; two++)
 		{	
+			
 			if(two == 0)
 			{
 				wr.print("\n" + "<div class=\"hero-unit\">" + "\n" + "<h1>Old Checkout</h1>");
@@ -101,8 +95,6 @@ public class UnionSim
 				wr.println("<th>Avg Time Strutters</th>");  
 				wr.println("</tr>");  
 				wr.println("</thead>"); 
-				
-
 			}
 			if(two == 1)
 			{
@@ -189,17 +181,7 @@ public class UnionSim
 				//END FOR
 				//END FOR
 
-				/*
-				wr.println("events " + eventQueue.size());
-				wr.println("people fed " + allPeople.size());
-				wr.println("checkout line " + oldCashier.line.size());
-				for(Eatery e : eaterys)
-					wr.println(e.type + " line " + e.line.size());
-				wr.println("avgTaco = " + avgTaco/numTaco);
-				wr.println("avgPizza = " + avgPizza/numPizza);
-				wr.println("avgSpecial = " + avgSpecial/numSpecial);
-				wr.println("avgStrutters = " + avgStrutters/numStrutters);
-				wr.println("avgSalad = " + avgSalad/numSalad);*/
+	
 				wr.print("</tbody>" + "\n" + "</table>" + "\n" + "</div>");
 				wr.flush();
 				
@@ -208,7 +190,7 @@ public class UnionSim
 			wr.print("\n" + "</body>" + "\n" + "</html>");
 		}
 		}
-			catch(Exception e){System.out.println(e);}
+		catch(Exception e){System.out.println(e);}
 	}
 	
 	//-----------------------------------------------FUNCTIONS---------------------------------------------------------
@@ -223,47 +205,42 @@ public class UnionSim
 			switch(per.state)
 			{
 				case NOTARRIVED: //People arrive, and are processed or placed in line
-					//System.out.println(per.type);
 					for(Eatery e : eaterys)
-					{
-						//System.out.println(e.type);
 						if(per.type == e.type)
-						{
-							//System.out.println("people arrived");
 							e.arrive(per);
-						}
-					}
+
 					break;
 					
 				case BOUGHT: //People leave food place, and sent to checkout
 					for(Eatery e : eaterys)
 						if(per.type == e.type)
 							e.popLine(per);
-                                        //call my method *************TAKYEE EDITED THIS**************************
-                                        if(per.numVendersDesired < per.numVendorsVisited)
-                                        {
-                                            System.out.println("THis is the number vendors desired "+per.numVendersDesired);
-                                            System.out.println("THis is the number vendors visited "+per.numVendorsVisited);
-                                            //call the method TakYee Wrote control f elevator
-                                            //This method is going to check where they've been and replace it with a new one
-                                           vendorChecker(per);
-                                           break;
-                                        }
-                                        else
-                                        {
-                                            if(!per.drink)
-                                            {
-                                                oldCashier.arrive(per);
-                                            }
-                                            else if(per.drink)
-                                            {
-                                                for(Eatery e : eaterys)
-                                                        if(e.type == Type.DRINK)
-                                                                e.arrive(per);
-                                            }
-                                        }
-                                        //call my method *************TAKYEE EDITED THIS**************************
-                                        //break if they want to go somewhere else
+							
+						//call my method *************TAKYEE EDITED THIS**************************
+						if(per.numVendersDesired < per.numVendorsVisited)
+						{
+							System.out.println("THis is the number vendors desired "+per.numVendersDesired);
+							System.out.println("THis is the number vendors visited "+per.numVendorsVisited);
+							//call the method TakYee Wrote control f elevator
+							//This method is going to check where they've been and replace it with a new one
+						   vendorChecker(per);
+						   break;
+						}
+						else
+						{
+							if(!per.drink)
+							{
+								oldCashier.arrive(per);
+							}
+							else if(per.drink)
+							{
+								for(Eatery e : eaterys)
+										if(e.type == Type.DRINK)
+												e.arrive(per);
+							}
+						}
+						//call my method *************TAKYEE EDITED THIS**************************
+						//break if they want to go somewhere else
 					break;
 					
 				case DRINK:
@@ -344,31 +321,25 @@ public class UnionSim
 		double bags;
 		int s = eventQueue.size();
 		while(aTime <= 37800)
-		{
-			//aTime += (-Math.log(1.0 - rand.nextDouble()) / lambda) * 60;//Generate time for next arrival * 60 to convert to sec
-			//eventQueue.add(new Person(aTime + (37800 * (dayCount - 1)), getType(), getDrink())); 
-                        
-                        aTime += (-Math.log(1.0 - rand.nextDouble()) / lambda) * 60;//Generate time for next arrival * 60 to convert to sec
-                        //***************ANDREW'S ORIGINAL CODE vv *************************************************************************
-			//eventQueue.add(new Person(aTime + (37800 * (dayCount - 1)), getType(), getDrink())); 
-                        //***************TAKYEE'S EDITED CODE vv ***************************************
-                        int tempNumVendors=1;//this used to be 0
-                        boolean enoughVendors=false;
-                        while(enoughVendors==false && tempNumVendors<5)
-                        {
-                            double a=rand.nextDouble();
-                            if(a<multVenProb)
-                                tempNumVendors++;
-                            else
-                                enoughVendors=true;
-                        }
-                        //System.out.println("tempNumVndors"+tempNumVendors);
-                        //************************************THIS IS WHERE TAKYEE ADDED TEMPTYPE INTO THE ARRAYLIST****************************
-                        Type tempType=getType();
-                        tempPer=new Person(aTime + (37800 * (dayCount - 1)), tempType, getDrink(),tempNumVendors,0);
-                        //tempPer.prevVen.add(tempType);
-                        eventQueue.add(tempPer);
-                        tempPer.prevVen.add(tempPer.type);//adds type
+		{                        
+			aTime += (-Math.log(1.0 - rand.nextDouble()) / lambda) * 60;//Generate time for next arrival * 60 to convert to sec
+			int tempNumVendors=1;//this used to be 0
+			boolean enoughVendors=false;
+			while(enoughVendors==false && tempNumVendors<5)
+			{
+				double a=rand.nextDouble();
+				if(a<multVenProb)
+					tempNumVendors++;
+				else
+					enoughVendors=true;
+			}
+			//System.out.println("tempNumVndors"+tempNumVendors);
+			//************************************THIS IS WHERE TAKYEE ADDED TEMPTYPE INTO THE ARRAYLIST****************************
+			Type tempType=getType();
+			tempPer=new Person(aTime + (37800 * (dayCount - 1)), tempType, getDrink(),tempNumVendors,0);
+			//tempPer.prevVen.add(tempType);
+			eventQueue.add(tempPer);
+			tempPer.prevVen.add(tempPer.type);//adds type
 		}
 	}
 	
@@ -418,21 +389,22 @@ public class UnionSim
 		public Type type;
 		public double time;//States the time this event pops
 		public double arrival;//States when this customers originally arrived
-                public int numVendorsVisited;
-                 //*****************************************TAKYEE WROTE THIS ARRAYLIST and numVendorsDesired******************************
+		public int numVendorsVisited;
+		//*****************************************TAKYEE WROTE THIS ARRAYLIST and numVendorsDesired******************************
 		public ArrayList<Type> prevVen = new ArrayList<Type>();
                 public int numVendersDesired;
 		//Customer data container/event object
-                //*******************************************TAKYEE ADDED numVendorsVisited**************************
+		//*******************************************TAKYEE ADDED numVendorsVisited**************************
+		
 		public Person(double a, Type b, boolean d, int e,int k)
 		{
 			drink = d;
 			time = a;
 			arrival = a;
 			type = b;
-                        numVendersDesired =e;
+			numVendersDesired =e;
 			state = State.NOTARRIVED;
-                        numVendorsVisited=k;
+			numVendorsVisited=k;
 		}
 		
 		@Override
@@ -469,6 +441,7 @@ public class UnionSim
 				temp = 4;
 			if(t == Type.STRUTTERS || t == Type.SPECIAL)
 				temp = 5;		
+				
  			cashier = new Cashier(t, temp);
 			line = new LinkedList<Person>();
                         
@@ -516,10 +489,10 @@ public class UnionSim
 					per.time += generateTime(5);
 					break;
 			}
-                        //**********************************TAKYEE EDITED*********************************************
-                        per.numVendorsVisited++;
-                        //**********************************TAKYEE EDITED*********************************************
-                        //System.out.println("Changes the state to bought");
+			//**********************************TAKYEE EDITED*********************************************
+			per.numVendorsVisited++;
+			//**********************************TAKYEE EDITED*********************************************
+			//System.out.println("Changes the state to bought");
 			per.state= State.BOUGHT;
 			//If NOT old and person has drink then add drink time
 			if(type == Type.DRINK)
@@ -580,13 +553,17 @@ public class UnionSim
 			per.lastCash = name;
 			busy = true;
 			per.time += generateTime(checkTime);
+			
 			if(!oldCheckout && per.drink)
 				per.time += generateTime(drinkTime);
+				
 			per.state = State.CHECKOUT;
 			eventQueue.add(per);
 		}		
 	}
-        //*****************************************************************TAKYEE WROTE THIS METHOD************************************
+	
+	//*****************************************************************TAKYEE WROTE THIS METHOD************************************
+	
 	public static void vendorChecker(Person per)
         {
             boolean foundNewType=false;
